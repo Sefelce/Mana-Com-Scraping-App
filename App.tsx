@@ -7,14 +7,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
-import ScrapeComponent from './GetDataFromMana-Com';
-
+import ScrapeComponent from './Component/GetDataFromMana-Com';
+import ManacomData from './Component/SaveMana-ComAccountData';
 
 
 const Drawer = createDrawerNavigator();
 
 
-const Manacom = ({ navigation }) => {
+const Manacom = () => {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <ScrapeComponent/>
@@ -23,7 +23,7 @@ const Manacom = ({ navigation }) => {
 };
 
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = () => {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text>Home Screen</Text>
@@ -31,7 +31,7 @@ const HomeScreen = ({ navigation }) => {
   );
 };
 
-const WriteDiscordWebHookUrl = ({ navigation }) => {
+const WriteDiscordWebHookUrl = () => {
   const [text, setText] = useState('');
   const [webhookUrl, setWebhookUrl] = useState('');
   const [visible, setVisible] = useState(false);
@@ -125,7 +125,7 @@ const WriteDiscordWebHookUrl = ({ navigation }) => {
   );
 };
 
-const MainScreen = ({ navigation }) => {
+const MainScreen = () => {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text>Main Screen</Text>
@@ -133,13 +133,16 @@ const MainScreen = ({ navigation }) => {
   );
 };
 
-const WriteLineToken = ({ navigation }) => {
+const WriteLineToken = () => {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text>LINE Token Screen</Text>
     </View>
   );
 };
+
+
+
 
 const App = () => {
   return (
@@ -161,6 +164,7 @@ const App = () => {
           <Drawer.Screen name="webhookurl" component={WriteDiscordWebHookUrl} />
           <Drawer.Screen name="linetoken" component={WriteLineToken} />
           <Drawer.Screen name="getdata" component={Manacom} />
+          <Drawer.Screen name="Mana-Com" component={ManacomData}/>
         </Drawer.Navigator>
       </NavigationContainer>
     </PaperProvider>
