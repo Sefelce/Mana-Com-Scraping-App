@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Button, TextInput, StyleSheet, ScrollView } from 'react-native';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import NoticesScraping from './NoticesScraping'; // 先ほどの関数をインポート
+import NoticesScraping from './NoticesScraping';
 
 const LOGIN_URL = 'https://web.mana-com.jp/login';
 const TARGET_URL = 'https://web.mana-com.jp/info';
@@ -19,6 +19,7 @@ const ScrapeComponent: React.FC = () => {
   const [scrapedData, setScrapedData] = useState<ScrapedData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [newTitle, setNewTitle] = useState<string>('');
 
   const loginAndScrape = async () => {
     setLoading(true);
@@ -116,6 +117,12 @@ const ScrapeComponent: React.FC = () => {
     }
   };
 
+  const handleTitleChange = async () => {
+    await AsyncStorage.setItem("Mana-ComLastNoticeTitle", newTitle);
+    setNewTitle('');
+    loginAndScrape();
+  };
+
   useEffect(() => {
     loginAndScrape();
   }, []);
@@ -140,6 +147,13 @@ const ScrapeComponent: React.FC = () => {
       ) : (
         <Text>新しいお知らせはありません</Text>
       )}
+      {/* <TextInput
+        style={styles.input}
+        value={newTitle}
+        onChangeText={setNewTitle}
+        placeholder="新しいタイトルを入力"
+      />
+      <Button title="タイトルを変更" onPress={handleTitleChange} disabled={loading || !newTitle} /> */}
       <Button title="再読み込み" onPress={loginAndScrape} disabled={loading} />
     </View>
   );
@@ -161,6 +175,13 @@ const styles = StyleSheet.create({
   },
   noticeTitle: {
     fontWeight: 'bold',
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
   },
 });
 

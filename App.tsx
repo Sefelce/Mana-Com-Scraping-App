@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, ActivityIndicator } from 'react-native';
 import { TextInput, Button, Text, Provider as PaperProvider, Dialog, Portal, Paragraph, IconButton } from 'react-native-paper';
 import useDiscordWebhook from './hooks/useDiscordWebhook';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,6 +9,56 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import ScrapeComponent from './Component/GetDataFromMana-Com';
 import ManacomData from './Component/SaveMana-ComAccountData';
+import axios from 'axios';
+import * as TaskManager from 'expo-task-manager';
+import * as BackgroundFetch from 'expo-background-fetch';
+
+import {getManaComInfo} from './BackGround/NoticeScraping';
+
+
+// メッセージ送信の間隔を設定する関数
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Discordにメッセージを送信する関数
+const sendToDiscord = async (webhookUrl: string, message: string) => {
+  const maxLength = 2000;
+
+  if (message.length <= maxLength) {
+    await axios.post(webhookUrl, { content: message });
+  } else {
+    const parts = Math.ceil(message.length / maxLength);
+    for (let i = parts - 1; i >= 0; i--) {
+      const part = message.slice(i * maxLength, (i + 1) * maxLength);
+      await axios.post(webhookUrl, { content: part });
+      await wait(1000); // メッセージ送信間の待機時間を追加
+    }
+  }
+};
+
+const TASK_NAME = "BACKGROUND_TASK";
+
+// タスクの定義
+TaskManager.defineTask(TASK_NAME, async () => {
+  try {
+    const discordWebHookUrl = await AsyncStorage.getItem("discordWebHookUrl");
+    
+    if (discordWebHookUrl) {
+      await sendToDiscord(discordWebHookUrl, "バックグラウンドテスト");
+    }
+    return BackgroundFetch.Result.NewData;
+  } catch (error) {
+    console.error("バックグラウンドタスクの実行に失敗しました:", error);
+    return BackgroundFetch.Result.Failed;
+  }
+});
+
+// タスクの登録
+BackgroundFetch.registerTaskAsync(TASK_NAME, {
+  //24時間
+  minimumInterval: 60 * 60 * 24,
+  stopOnTerminate: false, // アプリが終了してもタスクを停止しない
+  startOnBoot: true, // デバイスが起動したときにタスクを開始する
+}).catch(err => console.error("タスクの登録に失敗しました:", err));
 
 
 const Drawer = createDrawerNavigator();
@@ -125,13 +175,40 @@ const WriteDiscordWebHookUrl = () => {
   );
 };
 
+
+
 const MainScreen = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchNotices = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const fetchedNotices = await getManaComInfo();
+      console.log('取得したお知らせ:', fetchedNotices);
+    } catch (error) {
+      setError(`エラーが発生しました: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Main Screen</Text>
+    <View style={{ padding: 20 }}>
+      <Button onPress={fetchNotices} mode="contained">お知らせを取得</Button>
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
+      {error && <Text style={{ color: 'red' }}>{error}</Text>}
     </View>
   );
 };
+
+
+
+
+
+
 
 const WriteLineToken = () => {
   return (
@@ -149,7 +226,7 @@ const App = () => {
     <PaperProvider>
       <NavigationContainer>
         <Drawer.Navigator
-          initialRouteName="Main"
+          initialRouteName="マナコムアカウント"
           screenOptions={({ navigation }) => ({
             headerLeft: () => (
               <IconButton
@@ -160,11 +237,11 @@ const App = () => {
           })}
         >
           <Drawer.Screen name="Main" component={MainScreen} />
-          <Drawer.Screen name="Home" component={HomeScreen} />
-          <Drawer.Screen name="webhookurl" component={WriteDiscordWebHookUrl} />
-          <Drawer.Screen name="linetoken" component={WriteLineToken} />
-          <Drawer.Screen name="getdata" component={Manacom} />
-          <Drawer.Screen name="Mana-Com" component={ManacomData}/>
+          {/* <Drawer.Screen name="Home" component={HomeScreen} /> */}
+          <Drawer.Screen name="Discordの設定" component={WriteDiscordWebHookUrl} />
+          {/* <Drawer.Screen name="LINEの設定" component={WriteLineToken} /> */}
+          <Drawer.Screen name="マナコムのお知らせ" component={Manacom} />
+          <Drawer.Screen name="マナコムアカウント" component={ManacomData}/>
         </Drawer.Navigator>
       </NavigationContainer>
     </PaperProvider>
