@@ -2,7 +2,7 @@ import 'react-native-gesture-handler';
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, ActivityIndicator } from 'react-native';
 import { TextInput, Button, Text, Provider as PaperProvider, Dialog, Portal, Paragraph, IconButton } from 'react-native-paper';
-import useDiscordWebhook from './hooks/useDiscordWebhook';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -13,8 +13,9 @@ import axios from 'axios';
 import * as TaskManager from 'expo-task-manager';
 import * as BackgroundFetch from 'expo-background-fetch';
 
-import {getManaComInfo} from './BackGround/NoticeScraping';
 
+import {loginAndScrape} from './Scrraping/ScrapeFunctions';
+import {WriteDiscordWebHookUrl} from './Component/WriteDiscordWebhookUrl';
 
 // メッセージ送信の間隔を設定する関数
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -81,99 +82,7 @@ const HomeScreen = () => {
   );
 };
 
-const WriteDiscordWebHookUrl = () => {
-  const [text, setText] = useState('');
-  const [webhookUrl, setWebhookUrl] = useState('');
-  const [visible, setVisible] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
 
-  const writeData = async (keyName: string, value: string) => {
-    try {
-      await AsyncStorage.setItem(keyName, value);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem('discordWebHookUrl');
-      if (value !== null) {
-        setWebhookUrl(value);
-        setText(value); // 保存されているURLを入力欄にセット
-      } else {
-        setAlertMessage("URLが登録されていません");
-        setVisible(true);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  useEffect(() => {
-    getData();
-  }, []);
-
-  const { sendMessage } = useDiscordWebhook(webhookUrl);
-
-  const handleSendMessage = async () => {
-    if (!text) {
-      setAlertMessage('エラー: Webhook URLが空です');
-      setVisible(true);
-      return;
-    }
-
-    const now = new Date();
-    const message = `現在時刻: ${now.toLocaleString()}`;
-
-    try {
-      await writeData("discordWebHookUrl", text);
-      const newWebhookUrl = await AsyncStorage.getItem('discordWebHookUrl');
-      if (newWebhookUrl) {
-        const { sendMessage: newSendMessage } = useDiscordWebhook(newWebhookUrl);
-        await newSendMessage(message);
-        setAlertMessage('成功: メッセージが送信されました');
-        setWebhookUrl(newWebhookUrl); // 更新されたURLをステートにセット
-      } else {
-        setAlertMessage('エラー: 保存されたURLが取得できません');
-      }
-    } catch (error) {
-      setAlertMessage('エラー: メッセージの送信に失敗しました');
-    } finally {
-      setVisible(true);
-    }
-  };
-
-  const hideDialog = () => setVisible(false);
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Send Current Time to Discord</Text>
-      <TextInput
-        mode="outlined"
-        label="Webhook URL"
-        style={styles.input}
-        value={text}
-        onChangeText={setText}
-        placeholder="Type your Discord Webhook URL"
-      />
-      <Button mode="contained" onPress={handleSendMessage}>
-        Send Current Time
-      </Button>
-      <Portal>
-        <Dialog visible={visible} onDismiss={hideDialog}>
-          <Dialog.Title>Notification</Dialog.Title>
-          <Dialog.Content>
-            <Paragraph>{alertMessage}</Paragraph>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={hideDialog}>OK</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-    </View>
-  );
-};
 
 
 
@@ -185,7 +94,7 @@ const MainScreen = () => {
     setLoading(true);
     setError(null);
     try {
-      const fetchedNotices = await getManaComInfo();
+      const fetchedNotices = await loginAndScrape();
       console.log('取得したお知らせ:', fetchedNotices);
     } catch (error) {
       setError(`エラーが発生しました: ${error instanceof Error ? error.message : String(error)}`);

@@ -1,12 +1,26 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import NoticesScraping from '../Component/NoticesScraping';
 
 const LOGIN_URL = 'https://web.mana-com.jp/login';
 const TARGET_URL = 'https://web.mana-com.jp/info';
 
-export const getManaComInfo = async () => {
+interface ScrapedData {
+  title: string;
+  date: string;
+  status: string;
+  url: string | null;
+}
+
+export const loginAndScrape = async (
+  setScrapedData: React.Dispatch<React.SetStateAction<ScrapedData[]>>,
+  setError: React.Dispatch<React.SetStateAction<string | null>>,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+) => {
+  setLoading(true);
+  setError(null);
+
   try {
     const username = await AsyncStorage.getItem('ManaComUsername');
     const password = await AsyncStorage.getItem('ManaComPassword');
@@ -28,8 +42,8 @@ export const getManaComInfo = async () => {
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'axios/1.7.2'
-        }
+          'User-Agent': 'axios/1.7.2',
+        },
       }
     );
 
@@ -44,14 +58,14 @@ export const getManaComInfo = async () => {
 
     const targetPageResponse = await axios.get(TARGET_URL, {
       headers: {
-        Cookie: await AsyncStorage.getItem('sessionCookie') || ''
-      }
+        Cookie: (await AsyncStorage.getItem('sessionCookie')) || '',
+      },
     });
 
     const htmlContent = targetPageResponse.data;
     const $$ = cheerio.load(htmlContent);
 
-    const lastNoticeTitle = await AsyncStorage.getItem("Mana-ComLastNoticeTitle");
+    const lastNoticeTitle = await AsyncStorage.getItem('Mana-ComLastNoticeTitle');
 
     const newNotices: ScrapedData[] = [];
     let foundLastNotice = false;
@@ -78,14 +92,35 @@ export const getManaComInfo = async () => {
     });
 
     if (newNotices.length > 0) {
-      await AsyncStorage.setItem("Mana-ComLastNoticeTitle", newNotices[0].title);
+      await AsyncStorage.setItem('Mana-ComLastNoticeTitle', newNotices[0].title);
+      setScrapedData(newNotices);
+      console.log('新しいお知らせ:', newNotices);
+
+      // 新しいお知らせのURLにアクセス
+      const urls = newNotices.map(notice => notice.url).filter(url => url !== null) as string[];
+      const urlStatuses = await NoticesScraping(urls);
+      console.log('URLのステータス:', urlStatuses);
+    } else {
+      setScrapedData([]);
+      console.log('新しいお知らせはありません');
     }
 
-    return newNotices; // 新しいお知らせのリストを返す
-
+    console.log('最後に表示したお知らせのタイトル:', await AsyncStorage.getItem('Mana-ComLastNoticeTitle'));
   } catch (error) {
-    console.error(`エラーが発生しました: ${error instanceof Error ? error.message : String(error)}`);
-    throw error;
+    setError(`エラーが発生しました: ${error instanceof Error ? error.message : String(error)}`);
+  } finally {
+    setLoading(false);
   }
 };
 
+export const handleTitleChange = async (
+  newTitle: string,
+  setNewTitle: React.Dispatch<React.SetStateAction<string>>,
+  setScrapedData: React.Dispatch<React.SetStateAction<ScrapedData[]>>,
+  setError: React.Dispatch<React.SetStateAction<string | null>>,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+) => {
+  await AsyncStorage.setItem('Mana-ComLastNoticeTitle', newTitle);
+  setNewTitle('');
+  loginAndScrape(setScrapedData, setError, setLoading);
+};
