@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, TextInput, StyleSheet, ScrollView } from 'react-native';
-import { loginAndScrape, handleTitleChange } from '../Scrraping/ScrapeFunctions';
+import { loginAndScrape, handleTitleChange } from '../Scrraping/ScrapeFunctions';  // 修正されたパス
+import { ScrapedData } from './types';
+
+
 
 const ScrapeComponent: React.FC = () => {
   const [scrapedData, setScrapedData] = useState<ScrapedData[]>([]);

@@ -6,12 +6,8 @@ import NoticesScraping from '../Component/NoticesScraping';
 const LOGIN_URL = 'https://web.mana-com.jp/login';
 const TARGET_URL = 'https://web.mana-com.jp/info';
 
-interface ScrapedData {
-  title: string;
-  date: string;
-  status: string;
-  url: string | null;
-}
+import { ScrapedData } from '../Component/types';
+
 
 export const loginAndScrape = async (
   setScrapedData: React.Dispatch<React.SetStateAction<ScrapedData[]>>,

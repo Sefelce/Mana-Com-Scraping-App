@@ -87,28 +87,9 @@ const HomeScreen = () => {
 
 
 const MainScreen = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchNotices = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const fetchedNotices = await loginAndScrape();
-      console.log('取得したお知らせ:', fetchedNotices);
-    } catch (error) {
-      setError(`エラーが発生しました: ${error instanceof Error ? error.message : String(error)}`);
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <View style={{ padding: 20 }}>
-      <Button onPress={fetchNotices} mode="contained">お知らせを取得</Button>
-      {loading && <ActivityIndicator size="large" color="#0000ff" />}
-      {error && <Text style={{ color: 'red' }}>{error}</Text>}
+      <Text>あいうえお</Text>
     </View>
   );
 };
