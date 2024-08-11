@@ -1,7 +1,6 @@
 import 'react-native-gesture-handler';
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
-import { TextInput, Button, Text, Provider as PaperProvider, Dialog, Portal, Paragraph, IconButton } from 'react-native-paper';
+import {StyleSheet, View} from 'react-native';
+import {Provider as PaperProvider, IconButton } from 'react-native-paper';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
@@ -13,9 +12,8 @@ import axios from 'axios';
 import * as TaskManager from 'expo-task-manager';
 import * as BackgroundFetch from 'expo-background-fetch';
 
-
-import {loginAndScrape} from './Scrraping/ScrapeFunctions';
 import {WriteDiscordWebHookUrl} from './Component/WriteDiscordWebhookUrl';
+import { loginAndScrape } from './Scrraping/ScrapeFunctions';
 
 // メッセージ送信の間隔を設定する関数
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -45,6 +43,8 @@ TaskManager.defineTask(TASK_NAME, async () => {
     
     if (discordWebHookUrl) {
       await sendToDiscord(discordWebHookUrl, "バックグラウンドテスト");
+      //loginAndScrape();
+
     }
     return BackgroundFetch.Result.NewData;
   } catch (error) {
@@ -74,42 +74,6 @@ const Manacom = () => {
 };
 
 
-const HomeScreen = () => {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Home Screen</Text>
-    </View>
-  );
-};
-
-
-
-
-
-const MainScreen = () => {
-  return (
-    <View style={{ padding: 20 }}>
-      <Text>あいうえお</Text>
-    </View>
-  );
-};
-
-
-
-
-
-
-
-const WriteLineToken = () => {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>LINE Token Screen</Text>
-    </View>
-  );
-};
-
-
-
 
 const App = () => {
   return (
@@ -126,10 +90,7 @@ const App = () => {
             ),
           })}
         >
-          <Drawer.Screen name="Main" component={MainScreen} />
-          {/* <Drawer.Screen name="Home" component={HomeScreen} /> */}
           <Drawer.Screen name="Discordの設定" component={WriteDiscordWebHookUrl} />
-          {/* <Drawer.Screen name="LINEの設定" component={WriteLineToken} /> */}
           <Drawer.Screen name="マナコムのお知らせ" component={Manacom} />
           <Drawer.Screen name="マナコムアカウント" component={ManacomData}/>
         </Drawer.Navigator>

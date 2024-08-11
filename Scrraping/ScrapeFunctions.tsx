@@ -90,18 +90,13 @@ export const loginAndScrape = async (
     if (newNotices.length > 0) {
       await AsyncStorage.setItem('Mana-ComLastNoticeTitle', newNotices[0].title);
       setScrapedData(newNotices);
-      console.log('新しいお知らせ:', newNotices);
 
       // 新しいお知らせのURLにアクセス
       const urls = newNotices.map(notice => notice.url).filter(url => url !== null) as string[];
       const urlStatuses = await NoticesScraping(urls);
-      console.log('URLのステータス:', urlStatuses);
     } else {
       setScrapedData([]);
-      console.log('新しいお知らせはありません');
     }
-
-    console.log('最後に表示したお知らせのタイトル:', await AsyncStorage.getItem('Mana-ComLastNoticeTitle'));
   } catch (error) {
     setError(`エラーが発生しました: ${error instanceof Error ? error.message : String(error)}`);
   } finally {
