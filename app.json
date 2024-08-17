@@ -1,5 +1,8 @@
 {
   "expo": {
+    "assetBundlePatterns": [
+      "assets/**/*"
+    ],
     "name": "Mana-Com_app",
     "slug": "Mana-Com_app",
     "version": "1.0.0",

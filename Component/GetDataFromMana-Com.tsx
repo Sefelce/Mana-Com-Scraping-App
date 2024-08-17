@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, TextInput, StyleSheet, ScrollView } from 'react-native';
-import { loginAndScrape, handleTitleChange } from '../Scrraping/ScrapeFunctions';
+import { loginAndScrape } from '../Scrraping/ScrapeFunctions';
 import { ScrapedData } from './types';
-
-
 
 const ScrapeComponent: React.FC = () => {
   const [scrapedData, setScrapedData] = useState<ScrapedData[]>([]);
@@ -14,6 +12,16 @@ const ScrapeComponent: React.FC = () => {
   useEffect(() => {
     loginAndScrape(setScrapedData, setError, setLoading);
   }, []);
+
+  const handleTitleChange = (title: string) => {
+    setScrapedData((prevData) =>
+      prevData.map((notice) => ({
+        ...notice,
+        title: notice.title === newTitle ? title : notice.title,
+      }))
+    );
+    setNewTitle('');
+  };
 
   return (
     <View style={styles.container}>
@@ -43,7 +51,7 @@ const ScrapeComponent: React.FC = () => {
       />
       <Button
         title="タイトルを変更"
-        onPress={() => handleTitleChange(newTitle, setNewTitle, setScrapedData, setError, setLoading)}
+        onPress={() => handleTitleChange(newTitle)}
         disabled={loading || !newTitle}
       />
       <Button

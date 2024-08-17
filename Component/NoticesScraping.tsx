@@ -25,7 +25,7 @@ const sendToDiscord = async (webhookUrl: string, message: string) => {
   }
 };
 
-const NoticesScraping = async (urls: string[]): Promise<UrlStatus[]> => {
+export const NoticesScraping = async (urls: string[]): Promise<UrlStatus[]> => {
   const results: UrlStatus[] = [];
 
   for (const url of urls) {

@@ -5,7 +5,8 @@
   "scripts": {
     "start": "npx expo start --tunnel",
     "android": "expo start --android",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "prebuild": "license-checker --json ./assets/licenses.json"
   },
   "dependencies": {
     "@expo/metro-config": "^0.18.11",
@@ -23,6 +24,7 @@
     "expo-background-fetch": "~12.0.1",
     "expo-status-bar": "~1.12.1",
     "expo-task-manager": "~11.8.2",
+    "license-checker": "^25.0.1",
     "react": "18.2.0",
     "react-native": "0.74.5",
     "react-native-gesture-handler": "~2.16.1",
