@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, TextInput, StyleSheet, ScrollView } from 'react-native';
 import { loginAndScrape } from '../Scrraping/ScrapeFunctions';
 import { ScrapedData } from './types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ScrapeComponent: React.FC = () => {
   const [scrapedData, setScrapedData] = useState<ScrapedData[]>([]);
@@ -13,15 +14,12 @@ const ScrapeComponent: React.FC = () => {
     loginAndScrape(setScrapedData, setError, setLoading);
   }, []);
 
-  const handleTitleChange = (title: string) => {
-    setScrapedData((prevData) =>
-      prevData.map((notice) => ({
-        ...notice,
-        title: notice.title === newTitle ? title : notice.title,
-      }))
-    );
+  const handleTitleChange = async (title: string) => {
+    await AsyncStorage.setItem("Mana-ComLastNoticeTitle", title);
+    console.log(await AsyncStorage.getItem("Mana-ComLastNoticeTitle"));
     setNewTitle('');
   };
+  
 
   return (
     <View style={styles.container}>
@@ -36,7 +34,7 @@ const ScrapeComponent: React.FC = () => {
               <Text style={styles.noticeTitle}>タイトル: {notice.title}</Text>
               <Text>日付: {notice.date}</Text>
               <Text>ステータス: {notice.status}</Text>
-              <Text>URL: {notice.url || 'なし'}</Text>
+              <Text>URL: {notice.url}</Text>
             </View>
           ))}
         </ScrollView>

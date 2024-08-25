@@ -32,12 +32,21 @@ export const NoticesScraping = async (urls: string[]): Promise<UrlStatus[]> => {
     try {
       const response = await axios.get(url);
       const $ = cheerio.load(response.data);
-      let divContent = $('#info_body').text() || ''; // 指定されたdivタグのテキスト内容を抽出
+      let noticesTitle = $('#info_title').text(); 
+      let divContent = $('#info_body').text();
 
       // <br>タグを取り除く
       divContent = divContent.replace(/<br\s*\/?>/gi, '');
 
-      console.log({ url, status: response.status, content: divContent });
+      // 余分なスペースを削除
+      noticesTitle = noticesTitle.replace(/\s+/g, ' ').trim();
+
+      if (noticesTitle) {
+        divContent = `------------------------\n${noticesTitle}\n------------------------\n\n${divContent}`;
+      }
+
+      console.log(noticesTitle);
+      console.log(divContent);
 
       const webhookUrl = await AsyncStorage.getItem('discordWebHookUrl');
       if (webhookUrl) {
@@ -62,5 +71,7 @@ export const NoticesScraping = async (urls: string[]): Promise<UrlStatus[]> => {
 
   return results;
 };
+
+
 
 export default NoticesScraping;

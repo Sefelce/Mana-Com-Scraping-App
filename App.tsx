@@ -174,7 +174,7 @@ TaskManager.defineTask(TASK_NAME, async () => {
 // タスクの登録
 BackgroundFetch.registerTaskAsync(TASK_NAME, {
   //24時間
-  minimumInterval: 60 * 5,
+  minimumInterval: 60 * 60 * 24,
   stopOnTerminate: false, // アプリが終了してもタスクを停止しない
   startOnBoot: true, // デバイスが起動したときにタスクを開始する
 }).catch(err => console.error("タスクの登録に失敗しました:", err));

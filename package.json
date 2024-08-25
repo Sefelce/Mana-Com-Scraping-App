@@ -6,7 +6,8 @@
     "start": "npx expo start --tunnel",
     "android": "expo start --android",
     "web": "expo start --web",
-    "prebuild": "license-checker --json ./assets/licenses.json"
+    "prebuild": "license-checker --json ./assets/licenses.json",
+    "apk-build": "eas build --profile preview --platform android"
   },
   "dependencies": {
     "@expo/metro-config": "^0.18.11",
@@ -20,7 +21,7 @@
     "axios": "^1.7.2",
     "axios-cookiejar-support": "^5.0.2",
     "cheerio": "^1.0.0-rc.12",
-    "expo": "~51.0.26",
+    "expo": "^51.0.31",
     "expo-background-fetch": "~12.0.1",
     "expo-status-bar": "~1.12.1",
     "expo-task-manager": "~11.8.2",

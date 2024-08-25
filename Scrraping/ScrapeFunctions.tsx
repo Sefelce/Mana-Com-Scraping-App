@@ -91,8 +91,8 @@ export const loginAndScrape = async (
       await AsyncStorage.setItem('Mana-ComLastNoticeTitle', newNotices[0].title);
       setScrapedData(newNotices);
 
-      // 新しいお知らせのURLにアクセス
-      const urls = newNotices.map(notice => notice.url).filter(url => url !== null) as string[];
+      // 新しいお知らせのURLに古い順にアクセス
+      const urls = newNotices.reverse().map(notice => notice.url).filter(url => url !== null) as string[];
       const urlStatuses = await NoticesScraping(urls);
     } else {
       setScrapedData([]);
@@ -103,6 +103,8 @@ export const loginAndScrape = async (
     setLoading(false);
   }
 };
+
+
 
 export const handleTitleChange = async (
   newTitle: string,
