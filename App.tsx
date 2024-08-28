@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import {StyleSheet, View} from 'react-native';
-import {Provider as PaperProvider, IconButton } from 'react-native-paper';
+import {Provider as PaperProvider, IconButton, Button } from 'react-native-paper';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
@@ -8,7 +8,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import ScrapeComponent from './Component/GetDataFromMana-Com';
 import ManacomData from './Component/SaveMana-ComAccountData';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import * as TaskManager from 'expo-task-manager';
 import * as BackgroundFetch from 'expo-background-fetch';
 
@@ -35,12 +35,12 @@ export const initializeGlobals = (
 
 
 
-export const loginAndScrape = async () => {
-  globalSetLoading(true);
-  globalSetError(null);
-  const LOGIN_URL = 'https://web.mana-com.jp/login';
-  const TARGET_URL = 'https://web.mana-com.jp/info';
+
+export const loginAndScrape = async (): Promise<void> => {
   try {
+    const LOGIN_URL = 'https://web.mana-com.jp/login';
+    const TARGET_URL = 'https://web.mana-com.jp/info';
+
     const username = await AsyncStorage.getItem('ManaComUsername');
     const password = await AsyncStorage.getItem('ManaComPassword');
 
@@ -48,14 +48,15 @@ export const loginAndScrape = async () => {
       throw new Error('ユーザー名またはパスワードが設定されていません');
     }
 
-    const loginPageResponse = await axios.get(LOGIN_URL);
+    const loginPageResponse: AxiosResponse<string> = await axios.get(LOGIN_URL);
     const $ = cheerio.load(loginPageResponse.data);
     const csrfToken = $('input[name="_token"]').val();
+
     if (!csrfToken) {
       throw new Error('CSRFトークンが見つかりません');
     }
 
-    const loginResponse = await axios.post(
+    const loginResponse: AxiosResponse = await axios.post(
       LOGIN_URL,
       `login_id=${username}&password=${password}&_token=${csrfToken}`,
       {
@@ -75,7 +76,7 @@ export const loginAndScrape = async () => {
       await AsyncStorage.setItem('sessionCookie', cookies.join('; '));
     }
 
-    const targetPageResponse = await axios.get(TARGET_URL, {
+    const targetPageResponse: AxiosResponse<string> = await axios.get(TARGET_URL, {
       headers: {
         Cookie: (await AsyncStorage.getItem('sessionCookie')) || '',
       },
@@ -103,7 +104,7 @@ export const loginAndScrape = async () => {
 
         if (title === lastNoticeTitle) {
           foundLastNotice = true;
-          return false;
+          return false; // ループを終了
         }
 
         newNotices.push({ title, date, status, url });
@@ -112,23 +113,24 @@ export const loginAndScrape = async () => {
 
     if (newNotices.length > 0) {
       await AsyncStorage.setItem('Mana-ComLastNoticeTitle', newNotices[0].title);
-      globalSetScrapedData(newNotices);
 
-      // 新しいお知らせのURLにアクセス
+      // 新しいお知らせのURLを抽出
       const urls = newNotices.map(notice => notice.url).filter(url => url !== null) as string[];
+
+      // NoticesScraping関数に配列を渡して実行
       const urlStatuses = await NoticesScraping(urls);
+      
+      console.log('URL statuses:', urlStatuses);
+
+      // 必要に応じて、結果を保存や処理
+      globalSetScrapedData(newNotices);
     } else {
       globalSetScrapedData([]);
     }
-  } catch (error) {
-    globalSetError(`エラーが発生しました: ${error instanceof Error ? error.message : String(error)}`);
-  } finally {
-    globalSetLoading(false);
+  } catch (error: unknown) {
+    console.error('エラーが発生しました:', error);
   }
 };
-
-
-
 
 
 
@@ -174,7 +176,7 @@ TaskManager.defineTask(TASK_NAME, async () => {
 // タスクの登録
 BackgroundFetch.registerTaskAsync(TASK_NAME, {
   //24時間
-  minimumInterval: 60 * 60 * 24,
+  minimumInterval: 60 * 5,
   stopOnTerminate: false, // アプリが終了してもタスクを停止しない
   startOnBoot: true, // デバイスが起動したときにタスクを開始する
 }).catch(err => console.error("タスクの登録に失敗しました:", err));
@@ -187,6 +189,14 @@ const Manacom = () => {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <ScrapeComponent/>
+      <Button 
+        mode="contained" 
+        onPress={async () =>{
+          await loginAndScrape();
+        }}
+      >
+      Press me
+    </Button>
     </View>
   );
 };
