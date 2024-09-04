@@ -31,6 +31,11 @@ export const WriteDiscordWebHookUrl = () => {
     getData();
   }, []);
 
+  const handleTextChange = (text: string) => {
+    setText(text);
+    writeData('discordWebHookUrl', text);
+  };
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -38,7 +43,7 @@ export const WriteDiscordWebHookUrl = () => {
         label="Webhook URL"
         style={styles.input}
         value={text}
-        onChangeText={setText}
+        onChangeText={handleTextChange}
         placeholder="DiscordのWebhookURLを入力"
       />
     </View>

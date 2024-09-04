@@ -162,7 +162,6 @@ TaskManager.defineTask(TASK_NAME, async () => {
     const discordWebHookUrl = await AsyncStorage.getItem("discordWebHookUrl");
     
     if (discordWebHookUrl) {
-      await sendToDiscord(discordWebHookUrl, "バックグラウンドテスト");
       loginAndScrape();
 
     }

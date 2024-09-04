@@ -3,7 +3,7 @@ import { View, StyleSheet, Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TextInput, Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
 
-const SavePage = ({ navigation }) => {
+const SavePage = ({ }) => {
   const [inputs, setInputs] = useState({
     username: '',
     password: '',
