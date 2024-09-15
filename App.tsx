@@ -160,9 +160,16 @@ const TASK_NAME = "BACKGROUND_TASK";
 TaskManager.defineTask(TASK_NAME, async () => {
   try {
     const discordWebHookUrl = await AsyncStorage.getItem("discordWebHookUrl");
-    
+
     if (discordWebHookUrl) {
-      loginAndScrape();
+      try {
+        await loginAndScrape();
+      } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : JSON.stringify(e);
+        sendToDiscord(discordWebHookUrl, errorMessage);
+      }
+      
+
 
     }
     return BackgroundFetch.Result.NewData;
@@ -175,7 +182,7 @@ TaskManager.defineTask(TASK_NAME, async () => {
 // タスクの登録
 BackgroundFetch.registerTaskAsync(TASK_NAME, {
   //24時間
-  minimumInterval: 60 * 5,
+  minimumInterval: 60 * 60 * 24 ,
   stopOnTerminate: false, // アプリが終了してもタスクを停止しない
   startOnBoot: true, // デバイスが起動したときにタスクを開始する
 }).catch(err => console.error("タスクの登録に失敗しました:", err));
