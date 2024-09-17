@@ -1,26 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TextInput } from 'react-native-paper';
+import { TextInput, MD3LightTheme } from 'react-native-paper';
 
 export const WriteDiscordWebHookUrl = () => {
   const [text, setText] = useState('');
   const [webhookUrl, setWebhookUrl] = useState('');
-
-  const writeData = async (keyName: string, value: string) => {
-    try {
-      await AsyncStorage.setItem(keyName, value);
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
   const getData = async () => {
     try {
       const value = await AsyncStorage.getItem('discordWebHookUrl');
       if (value !== null) {
         setWebhookUrl(value);
-        setText(value); // 保存されているURLを入力欄にセット
+        setText(value);
       }
     } catch (e) {
       console.error(e);
@@ -31,9 +23,9 @@ export const WriteDiscordWebHookUrl = () => {
     getData();
   }, []);
 
-  const handleTextChange = (text: string) => {
+  const discordWebhookUrlChange = async (text: string) => {
     setText(text);
-    writeData('discordWebHookUrl', text);
+    await AsyncStorage.setItem("discordWebHookUrl", text);
   };
 
   return (
@@ -43,8 +35,9 @@ export const WriteDiscordWebHookUrl = () => {
         label="Webhook URL"
         style={styles.input}
         value={text}
-        onChangeText={handleTextChange}
+        onChangeText={discordWebhookUrlChange}
         placeholder="DiscordのWebhookURLを入力"
+        theme={customTheme}
       />
     </View>
   );
@@ -60,5 +53,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 });
+
+const customTheme = {
+  ...MD3LightTheme,
+  dark: false, // ダークモードを無効化
+  colors: {
+    ...MD3LightTheme.colors,
+    // 必要に応じてカスタムカラーを追加
+  },
+};
+
+
 
 export default WriteDiscordWebHookUrl;

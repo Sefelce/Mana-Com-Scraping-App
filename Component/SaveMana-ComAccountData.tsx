@@ -42,7 +42,7 @@ const SavePage = ({ }) => {
           mode="outlined"
           label="Username"
           style={styles.input}
-          placeholder="Type your username"
+          placeholder="ユーザーネームを入力..."
           value={inputs.username}
           onChangeText={text => handleTextChange(text, 'username')}
         />
@@ -50,7 +50,7 @@ const SavePage = ({ }) => {
           mode="outlined"
           label="Password"
           style={styles.input}
-          placeholder="Type your password"
+          placeholder="パスワードを入力..."
           secureTextEntry
           value={inputs.password}
           onChangeText={text => handleTextChange(text, 'password')}
