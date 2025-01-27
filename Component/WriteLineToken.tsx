@@ -3,13 +3,13 @@ import { StyleSheet, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TextInput, MD3LightTheme } from 'react-native-paper';
 
-export const WriteDiscordWebHookUrl = () => {
+export const WriteLineToken = () => {
   const [text, setText] = useState('');
   const [webhookUrl, setWebhookUrl] = useState('');
 
   const getData = async () => {
     try {
-      const value = await AsyncStorage.getItem('discordWebHookUrl');
+      const value = await AsyncStorage.getItem('LineToken');
       if (value !== null) {
         setWebhookUrl(value);
         setText(value);
@@ -23,20 +23,20 @@ export const WriteDiscordWebHookUrl = () => {
     getData();
   }, []);
 
-  const discordWebhookUrlChange = async (text: string) => {
+  const LineTokenChange = async (text: string) => {
     setText(text);
-    await AsyncStorage.setItem("discordWebHookUrl", text);
+    await AsyncStorage.setItem("LineToken", text);
   };
 
   return (
     <View style={styles.container}>
       <TextInput
         mode="outlined"
-        label="Webhook URL"
+        label="LINE Token"
         style={styles.input}
         value={text}
-        onChangeText={discordWebhookUrlChange}
-        placeholder="DiscordのWebhookURLを入力"
+        onChangeText={LineTokenChange}
+        placeholder="LINEのトークンを入力..."
         theme={customTheme}
       />
     </View>

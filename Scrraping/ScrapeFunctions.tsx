@@ -6,7 +6,7 @@ import NoticesScraping from '../Component/NoticesScraping';
 const LOGIN_URL = 'https://web.mana-com.jp/login';
 const TARGET_URL = 'https://web.mana-com.jp/info';
 
-import { ScrapedData } from '../Component/types';
+import { ScrapedData } from '../types/types';
 
 
 export const loginAndScrape = async (

@@ -5,3 +5,5 @@ export interface ScrapedData {
   status: string;
   url: string | null;
 }
+
+
